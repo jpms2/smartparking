@@ -1,4 +1,4 @@
-package com.example.herbertt.smartparkinkg;
+package br.cin.ufpe.inesescin.smartparking;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
