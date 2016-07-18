@@ -1,5 +1,7 @@
 package br.cin.ufpe.inesescin.smartparking.adapter;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 
 /**
@@ -9,38 +11,31 @@ public class Block {
 
     private ArrayList lojas;
     private ArrayList vagas;
-    private ArrayList<Block> blocosAdjacentes;
+    private ArrayList blocosAdjacentesID;
+    private LatLng latLng;
 
-    public Block(ArrayList vagas, ArrayList<Block> blocosAdjacentes){
+    public Block(ArrayList lojas, ArrayList vagas, ArrayList blocosAdjacentes, LatLng latLng){
         super();
+        this.lojas = lojas;
+        this.latLng = latLng;
         this.vagas = vagas;
-        this.blocosAdjacentes = blocosAdjacentes;
+        this.blocosAdjacentesID = blocosAdjacentes;
     }
-
-    public Block(){
-    }
-
     public ArrayList getVagas() {
         return vagas;
-    }
-
-    public void setVagas(ArrayList vagas) {
-        this.vagas = vagas;
     }
 
     public ArrayList getLojas() {
         return lojas;
     }
 
-    public void setLojas(ArrayList lojas) {
-        this.lojas = lojas;
+    public ArrayList getBlocosAdjacentes() {
+        return blocosAdjacentesID;
     }
 
-    public ArrayList<Block> getBlocosAdjacentes() {
-        return blocosAdjacentes;
+    public LatLng getLatLong() {
+        return latLng;
     }
 
-    public void setBlocosAdjacentes(ArrayList<Block> blocosAdjacentes) {
-        this.blocosAdjacentes = blocosAdjacentes;
-    }
 }
+
