@@ -23,32 +23,56 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import br.cin.ufpe.inesescin.smartparking.util.PermissionRequest;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
-                    GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback{
 
     private GoogleMap mMap;
-    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        setActivityEnvironment();
+        setUpGoogleMap();
+    }
+
+    public void setActivityEnvironment(){
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(myToolbar);
+    }
+
+    private void setUpGoogleMap() {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-            mGoogleApiClient.connect();
-        }
         mapFragment.getMapAsync(this);
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(myToolbar);
+    }
+
+
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        this.mMap = googleMap;
+        if(PermissionRequest.checkLocationPermission(this)){
+            this.mMap.setMyLocationEnabled(true);
+        }else{
+            PermissionRequest.requestLocationPermission(this);
+        }
+        this.mMap.setBuildingsEnabled(true);
+        this.mMap.getUiSettings().setZoomControlsEnabled(true);
+
+        LatLng latLng = new LatLng(-8.086155, -34.894311);
+        this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.5f));
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,60 +96,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        this.mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        this.mMap.setMyLocationEnabled(true);
-        this.mMap.setBuildingsEnabled(true);
-        this.mMap.getUiSettings().setZoomControlsEnabled(true);
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Location mLastLocation;
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        LatLng latLng = new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude());
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.i("LOG", "AddressLocationActivity.onConnectionSuspended(" + i + ")");
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
-        mGoogleApiClient.connect();
     }
 
     protected void onStop() {
-        mGoogleApiClient.disconnect();
         super.onStop();
     }
 }
