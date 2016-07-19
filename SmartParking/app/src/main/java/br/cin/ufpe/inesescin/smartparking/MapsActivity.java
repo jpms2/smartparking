@@ -9,7 +9,9 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -25,6 +27,7 @@ import br.cin.ufpe.inesescin.smartparking.service.DirectionServiceImp;
 import br.cin.ufpe.inesescin.smartparking.service.IDirectionService;
 import br.cin.ufpe.inesescin.smartparking.service.LocationListener;
 import br.cin.ufpe.inesescin.smartparking.service.LocationService;
+import br.cin.ufpe.inesescin.smartparking.asyncTasks.BlockLatLngByStoreNameAsync;
 import br.cin.ufpe.inesescin.smartparking.util.PermissionRequest;
 
 
@@ -111,6 +114,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public boolean onQueryTextSubmit(String s) {
                 //Do something on submit
+                BlockLatLngByStoreNameAsync blockLatLngByStoreNameAsync = new BlockLatLngByStoreNameAsync(s);
+                blockLatLngByStoreNameAsync.execute();
                 return false;
             }
 
