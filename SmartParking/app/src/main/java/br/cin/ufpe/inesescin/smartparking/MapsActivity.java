@@ -1,32 +1,34 @@
 package br.cin.ufpe.inesescin.smartparking;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
+import android.content.Context;
+import android.graphics.Color;
 import android.location.Location;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.List;
+
+import br.cin.ufpe.inesescin.smartparking.service.DirectionListener;
+import br.cin.ufpe.inesescin.smartparking.service.DirectionServiceImp;
+import br.cin.ufpe.inesescin.smartparking.service.IDirectionService;
+import br.cin.ufpe.inesescin.smartparking.service.LocationListener;
 import br.cin.ufpe.inesescin.smartparking.util.PermissionRequest;
 
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback{
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, DirectionListener {
 
     private GoogleMap mMap;
 
@@ -73,6 +75,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         LatLng latLng = new LatLng(-8.086155, -34.894311);
         this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.5f));
+
+        IDirectionService directionService = new DirectionServiceImp();
+        directionService.getDirections(latLng, latLng, this);
+    }
+
+
+    public static PolylineOptions createPolyline(List<LatLng> locationList, int width, int color) {
+        PolylineOptions rectLine = new PolylineOptions().width(width).color(color).geodesic(true);
+        for (LatLng location : locationList) {
+            rectLine.add(location);
+        }
+        return rectLine;
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -103,5 +117,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+    }
+
+    @Override
+    public void onDirectionReceived(List<LatLng> latLngs) {
+        PolylineOptions polylineOptions = createPolyline(latLngs, 3, Color.BLACK);
+        mMap.addPolyline(polylineOptions);
     }
 }
