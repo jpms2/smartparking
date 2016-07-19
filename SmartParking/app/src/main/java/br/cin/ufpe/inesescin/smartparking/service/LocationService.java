@@ -3,10 +3,12 @@ package br.cin.ufpe.inesescin.smartparking.service;
 import android.location.Location;
 import android.os.AsyncTask;
 
+import com.google.android.gms.maps.model.LatLng;
+
 /**
  * Created by jal3 on 01/07/2016.
  */
-public class LocationService extends AsyncTask<String, Void, Void>{
+public class LocationService extends AsyncTask<String, Location, Void>{
     private LocationListener locationListener;
 
     public LocationListener getLocationListener() {
@@ -24,8 +26,10 @@ public class LocationService extends AsyncTask<String, Void, Void>{
             Location location = new Location("mockProvider");
             location.setLatitude(-8.086022);
             location.setLongitude(-34.891873);
+            //  -8.085936, -34.891969
 
-            locationListener.onLocationChanged(location);
+            //usa o metodo OnProgressUpdate para atualizar o listener de forma correta
+            publishProgress(location);
 
             try {
                 Thread.sleep(10000);
@@ -33,5 +37,11 @@ public class LocationService extends AsyncTask<String, Void, Void>{
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    protected void onProgressUpdate(Location... values) {
+        super.onProgressUpdate(values);
+        locationListener.onLocationChanged(values[0]);
     }
 }

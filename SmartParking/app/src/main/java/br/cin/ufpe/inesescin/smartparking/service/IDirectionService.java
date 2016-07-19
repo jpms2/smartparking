@@ -8,5 +8,7 @@ import java.util.List;
  * Created by jal3 on 18/07/2016.
  */
 public interface IDirectionService {
-    public void getDirections(LatLng from, LatLng to, DirectionListener directionListener);
+    public void getDirections(LatLng from, LatLng to);
+
+    public void setDirectionListener(DirectionListener directionListener);
 }

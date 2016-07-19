@@ -9,8 +9,11 @@ import java.util.List;
  * Created by jal3 on 18/07/2016.
  */
 public class DirectionServiceImp implements IDirectionService {
+
+    private DirectionListener directionListener;
+
     @Override
-    public void getDirections(LatLng from, LatLng to, DirectionListener directionListener) {
+    public void getDirections(LatLng from, LatLng to) {
         List<LatLng> latLngs = new ArrayList<>();
         latLngs.add(new LatLng(-8.084925, -34.894689));
         latLngs.add(new LatLng(-8.085482, -34.894750));
@@ -19,4 +22,11 @@ public class DirectionServiceImp implements IDirectionService {
 
         directionListener.onDirectionReceived(latLngs);
     }
+
+    @Override
+    public void setDirectionListener(DirectionListener directionListener) {
+        this.directionListener = directionListener;
+    }
+
+
 }

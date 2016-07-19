@@ -1,6 +1,5 @@
 package br.cin.ufpe.inesescin.smartparking;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -16,7 +15,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
@@ -25,12 +24,15 @@ import br.cin.ufpe.inesescin.smartparking.service.DirectionListener;
 import br.cin.ufpe.inesescin.smartparking.service.DirectionServiceImp;
 import br.cin.ufpe.inesescin.smartparking.service.IDirectionService;
 import br.cin.ufpe.inesescin.smartparking.service.LocationListener;
+import br.cin.ufpe.inesescin.smartparking.service.LocationService;
 import br.cin.ufpe.inesescin.smartparking.util.PermissionRequest;
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, DirectionListener {
 
     private GoogleMap mMap;
+    private LocationService locationService;
+    private IDirectionService directionService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
         setActivityEnvironment();
         setUpGoogleMap();
+        setUpLocationService();
+        setUpDirectionsService();
     }
 
     public void setActivityEnvironment(){
@@ -52,6 +56,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
     }
 
+    private void setUpDirectionsService(){
+        directionService = new DirectionServiceImp();
+        directionService.setDirectionListener(this);
+    }
+
+    public void callDirections(LatLng from, LatLng to) {
+        directionService.getDirections(from, to);
+    }
+
+    private void setUpLocationService(){
+        locationService = new LocationService();
+        locationService.setLocationListener(this);
+    }
+
+    private void startLocationService(){
+        locationService.execute();
+    }
 
     /**
      * Manipulates the map once available.
@@ -76,17 +97,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng latLng = new LatLng(-8.086155, -34.894311);
         this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.5f));
 
-        IDirectionService directionService = new DirectionServiceImp();
-        directionService.getDirections(latLng, latLng, this);
-    }
-
-
-    public static PolylineOptions createPolyline(List<LatLng> locationList, int width, int color) {
-        PolylineOptions rectLine = new PolylineOptions().width(width).color(color).geodesic(true);
-        for (LatLng location : locationList) {
-            rectLine.add(location);
-        }
-        return rectLine;
+        startLocationService();
+        callDirections(latLng, latLng); //apenas para teste, deverá ser chamado quando for solicitado
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,7 +133,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onLocationChanged(Location location) {
-
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(latLng));
     }
 
     @Override
@@ -129,4 +142,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         PolylineOptions polylineOptions = createPolyline(latLngs, 3, Color.BLACK);
         mMap.addPolyline(polylineOptions);
     }
+
+    public static PolylineOptions createPolyline(List<LatLng> locationList, int width, int color) {
+        PolylineOptions rectLine = new PolylineOptions().width(width).color(color).geodesic(true);
+        for (LatLng location : locationList) {
+            rectLine.add(location);
+        }
+        return rectLine;
+    }
+
+
 }
