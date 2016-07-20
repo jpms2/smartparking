@@ -22,21 +22,14 @@ public class LocationService extends AsyncTask<String, Location, Void>{
     @Override
     protected Void doInBackground(String... params) {
 
-        while(true){
-            Location location = new Location("mockProvider");
-            location.setLatitude(-8.086022);
-            location.setLongitude(-34.891873);
+        Location location = new Location("mockProvider");
+        location.setLatitude(-8.086022);
+        location.setLongitude(-34.891873);
             //  -8.085936, -34.891969
 
             //usa o metodo OnProgressUpdate para atualizar o listener de forma correta
-            publishProgress(location);
-
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+//            publishProgress(location);
+        return null;
     }
 
     @Override

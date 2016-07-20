@@ -28,10 +28,11 @@ import br.cin.ufpe.inesescin.smartparking.service.IDirectionService;
 import br.cin.ufpe.inesescin.smartparking.service.LocationListener;
 import br.cin.ufpe.inesescin.smartparking.service.LocationService;
 import br.cin.ufpe.inesescin.smartparking.asyncTasks.BlockLatLngByStoreNameAsync;
+import br.cin.ufpe.inesescin.smartparking.asyncTasks.OnBlockLatLngReceivedListener;
 import br.cin.ufpe.inesescin.smartparking.util.PermissionRequest;
 
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, DirectionListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DirectionListener, LocationListener, OnBlockLatLngReceivedListener {
 
     private GoogleMap mMap;
     private LocationService locationService;
@@ -114,7 +115,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public boolean onQueryTextSubmit(String s) {
                 //Do something on submit
-                BlockLatLngByStoreNameAsync blockLatLngByStoreNameAsync = new BlockLatLngByStoreNameAsync(s);
+                BlockLatLngByStoreNameAsync blockLatLngByStoreNameAsync = new BlockLatLngByStoreNameAsync(s, MapsActivity.this);
                 blockLatLngByStoreNameAsync.execute();
                 return false;
             }
@@ -137,9 +138,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
+    public void onBlockLatLngReceived(LatLng latLng) {
+        String x = latLng.toString();
+    }
+
+    @Override
     public void onLocationChanged(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(latLng));
+//        mMap.addMarker(new MarkerOptions().position(latLng));
     }
 
     @Override

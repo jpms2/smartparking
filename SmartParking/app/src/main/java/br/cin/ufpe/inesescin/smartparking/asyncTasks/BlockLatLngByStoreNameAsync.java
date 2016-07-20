@@ -15,11 +15,13 @@ import br.cin.ufpe.inesescin.smartparking.connection.FiwareConnection;
 public class BlockLatLngByStoreNameAsync extends AsyncTask<String, Void, LatLng> {
 
     private String storeName;
-    LatLng latLng;
-    Double[] latLngArray = new Double[2];
+    private LatLng latLng;
+    private Double[] latLngArray = new Double[2];
+    private OnBlockLatLngReceivedListener listener;
 
-    public BlockLatLngByStoreNameAsync(String storeName) {
+    public BlockLatLngByStoreNameAsync(String storeName,OnBlockLatLngReceivedListener listener) {
         this.storeName = storeName;
+        this.listener = listener;
     }
 
     @Override
@@ -56,9 +58,8 @@ public class BlockLatLngByStoreNameAsync extends AsyncTask<String, Void, LatLng>
     @Override
     protected void onPostExecute(LatLng result) {
         super.onPostExecute(result);
-        if(result != null && !result.equals(""))
-        {
-
+        if(result != null){
+            listener.onBlockLatLngReceived(result);
         }
     }
 }
