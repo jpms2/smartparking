@@ -9,9 +9,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -37,6 +35,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private LocationService locationService;
     private IDirectionService directionService;
+    private LatLng origin;
+    private LatLng destination;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +44,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
         setActivityEnvironment();
         setUpGoogleMap();
-        setUpLocationService();
         setUpDirectionsService();
     }
 
@@ -69,12 +68,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         directionService.getDirections(from, to);
     }
 
-    private void setUpLocationService(){
-        locationService = new LocationService();
-        locationService.setLocationListener(this);
-    }
-
-    private void startLocationService(){
+    private void callCurrentLocation(){
+        locationService = new LocationService(this);
         locationService.execute();
     }
 
@@ -101,8 +96,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng latLng = new LatLng(-8.086155, -34.894311);
         this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.5f));
 
-        startLocationService();
-        callDirections(latLng, latLng); //apenas para teste, deverá ser chamado quando for solicitado
+
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -139,13 +133,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBlockLatLngReceived(LatLng latLng) {
-        String x = latLng.toString();
+        this.destination = latLng;
+        callCurrentLocation();
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-//        mMap.addMarker(new MarkerOptions().position(latLng));
+    public void onLocationReceived(Location location) {
+        this.origin = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(origin));
+        callDirections(destination, origin);
     }
 
     @Override
