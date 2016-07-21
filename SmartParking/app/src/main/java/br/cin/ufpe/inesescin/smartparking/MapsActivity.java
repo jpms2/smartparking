@@ -1,34 +1,33 @@
 package br.cin.ufpe.inesescin.smartparking;
 
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuItem;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+import android.view.MenuInflater;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 
+import br.cin.ufpe.inesescin.smartparking.asyncTasks.BlockLatLngByStoreNameAsync;
+import br.cin.ufpe.inesescin.smartparking.asyncTasks.OnBlockLatLngReceivedListener;
 import br.cin.ufpe.inesescin.smartparking.service.DirectionListener;
 import br.cin.ufpe.inesescin.smartparking.service.DirectionServiceImp;
 import br.cin.ufpe.inesescin.smartparking.service.IDirectionService;
 import br.cin.ufpe.inesescin.smartparking.service.LocationListener;
 import br.cin.ufpe.inesescin.smartparking.service.LocationService;
-import br.cin.ufpe.inesescin.smartparking.asyncTasks.BlockLatLngByStoreNameAsync;
-import br.cin.ufpe.inesescin.smartparking.asyncTasks.OnBlockLatLngReceivedListener;
 import br.cin.ufpe.inesescin.smartparking.util.PermissionRequest;
 
 
@@ -46,6 +45,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setUpGoogleMap();
         setUpLocationService();
         setUpDirectionsService();
+        getSearchQuery();
     }
 
     public void setActivityEnvironment(){
@@ -105,27 +105,43 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         callDirections(latLng, latLng); //apenas para teste, deverá ser chamado quando for solicitado
     }
 
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_search, menu);
-        MenuItem searchItem = menu.findItem(R.id.busca);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        // Inflate the options menu from XML
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_search, menu);
 
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                //Do something on submit
-                BlockLatLngByStoreNameAsync blockLatLngByStoreNameAsync = new BlockLatLngByStoreNameAsync(s, MapsActivity.this);
-                blockLatLngByStoreNameAsync.execute();
-                return false;
-            }
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.busca).getActionView();
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
 
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
-            }
-        });
         return true;
+    }
+
+    public void getSearchQuery(){
+        // Get the intent, verify the action and get the query
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            // Handle the normal search query case
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(query, MapsActivity.this);
+            asyncBlsn.execute();
+        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
+            String data = intent.getDataString();
+            String query = getStoreFromData(data);
+            BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(query, MapsActivity.this);
+            asyncBlsn.execute();
+        }
+
+    }
+
+    public String getStoreFromData(String data){
+
+        return "";
     }
 
     @Override
