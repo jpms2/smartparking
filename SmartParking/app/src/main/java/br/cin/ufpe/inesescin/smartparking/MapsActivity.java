@@ -6,28 +6,32 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuInflater;
-
+import android.view.MenuItem;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 
-import br.cin.ufpe.inesescin.smartparking.asyncTasks.BlockLatLngByStoreNameAsync;
-import br.cin.ufpe.inesescin.smartparking.asyncTasks.OnBlockLatLngReceivedListener;
 import br.cin.ufpe.inesescin.smartparking.service.DirectionListener;
 import br.cin.ufpe.inesescin.smartparking.service.DirectionServiceImp;
 import br.cin.ufpe.inesescin.smartparking.service.IDirectionService;
 import br.cin.ufpe.inesescin.smartparking.service.LocationListener;
 import br.cin.ufpe.inesescin.smartparking.service.LocationService;
+import br.cin.ufpe.inesescin.smartparking.asyncTasks.BlockLatLngByStoreNameAsync;
+import br.cin.ufpe.inesescin.smartparking.asyncTasks.OnBlockLatLngReceivedListener;
 import br.cin.ufpe.inesescin.smartparking.util.PermissionRequest;
 
 
@@ -36,6 +40,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private LocationService locationService;
     private IDirectionService directionService;
+    private LatLng origin;
+    private LatLng destination;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,12 +75,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         directionService.getDirections(from, to);
     }
 
-    private void setUpLocationService(){
-        locationService = new LocationService();
-        locationService.setLocationListener(this);
-    }
-
-    private void startLocationService(){
+    private void callCurrentLocation(){
+        locationService = new LocationService(this);
         locationService.execute();
     }
 
@@ -101,8 +103,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng latLng = new LatLng(-8.086155, -34.894311);
         this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.5f));
 
-        startLocationService();
-        callDirections(latLng, latLng); //apenas para teste, deverá ser chamado quando for solicitado
+
     }
 
     @Override
@@ -155,13 +156,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBlockLatLngReceived(LatLng latLng) {
-        String x = latLng.toString();
+        this.destination = latLng;
+        callCurrentLocation();
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-//        mMap.addMarker(new MarkerOptions().position(latLng));
+    public void onLocationReceived(Location location) {
+        this.origin = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(origin));
+        callDirections(destination, origin);
     }
 
     @Override
