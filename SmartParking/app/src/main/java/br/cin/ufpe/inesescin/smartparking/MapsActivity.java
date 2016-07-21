@@ -125,12 +125,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void getSearchQuery(){
         // Get the intent, verify the action and get the query
         Intent intent = getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+        if (Intent.ACTION_SEARCH.equalsIgnoreCase(intent.getAction())) {
             // Handle the normal search query case
             String query = intent.getStringExtra(SearchManager.QUERY);
             BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(query, MapsActivity.this);
             asyncBlsn.execute();
-        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+        } else if (Intent.ACTION_VIEW.equalsIgnoreCase(intent.getAction())) {
             // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
             String data = intent.getDataString();
             String query = getStoreFromData(data);
