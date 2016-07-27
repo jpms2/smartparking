@@ -27,9 +27,9 @@ public class LocationService extends AsyncTask<String, Location, Location>{
     protected Location doInBackground(String... params) {
 
         Location location = new Location("mockProvider");
-        location.setLatitude(-8.086022);
-        location.setLongitude(-34.891873);
-            //  -8.085936, -34.891969
+        location.setLatitude(-8.084571);
+        location.setLongitude(-34.895239);
+            //  -8.084571, -34.895239
 
         return location;
     }

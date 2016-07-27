@@ -13,6 +13,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -100,8 +102,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.mMap.setBuildingsEnabled(true);
         this.mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        LatLng latLng = new LatLng(-8.086155, -34.894311);
-        this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.5f));
+        LatLng latLng = new LatLng(-8.085131, -34.894550);
+        this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f));
 
 
     }
@@ -133,8 +135,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (Intent.ACTION_VIEW.equalsIgnoreCase(intent.getAction())) {
             // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
             String data = intent.getDataString();
-            String query = getStoreFromData(data);
-            BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(query, MapsActivity.this);
+            BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(data, MapsActivity.this);
             asyncBlsn.execute();
         }
 
@@ -156,15 +157,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBlockLatLngReceived(LatLng latLng) {
-        this.destination = latLng;
-        callCurrentLocation();
+        if(latLng!=null){
+            this.destination = latLng;
+            callCurrentLocation();
+        }else{
+            Toast.makeText(this, "Erro ao se conectar com o servidor. Tente novamente mais tarde", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void onLocationReceived(Location location) {
         this.origin = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(origin));
-        callDirections(destination, origin);
+        mMap.addMarker(new MarkerOptions().position(origin).title("Usuario"));
+//        mMap.addMarker(new MarkerOptions().position(destination).title("Destino"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(-8.084884, -34.894539)).title("Destino")); //TODO apenas para teste
+        callDirections(origin, destination);
     }
 
     @Override

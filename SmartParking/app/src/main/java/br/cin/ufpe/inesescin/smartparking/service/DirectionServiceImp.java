@@ -15,10 +15,10 @@ public class DirectionServiceImp implements IDirectionService {
     @Override
     public void getDirections(LatLng from, LatLng to) {
         List<LatLng> latLngs = new ArrayList<>();
-        latLngs.add(new LatLng(-8.084925, -34.894689));
-        latLngs.add(new LatLng(-8.085482, -34.894750));
-        latLngs.add(new LatLng(-8.085397, -34.894499));
-        latLngs.add(new LatLng(-8.085386, -34.894248));
+        latLngs.add(new LatLng(-8.084571, -34.895239));
+        latLngs.add(new LatLng(-8.084621, -34.894788));
+        latLngs.add(new LatLng(-8.084661, -34.894512));
+        latLngs.add(new LatLng(-8.084884, -34.894539));
 
         directionListener.onDirectionReceived(latLngs);
     }
