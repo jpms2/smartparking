@@ -133,8 +133,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (Intent.ACTION_VIEW.equalsIgnoreCase(intent.getAction())) {
             // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
             String data = intent.getDataString();
-            String query = getStoreFromData(data);
-            BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(query, MapsActivity.this);
+            BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(data, MapsActivity.this);
             asyncBlsn.execute();
         }
 
