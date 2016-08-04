@@ -158,6 +158,39 @@ public class FiwareConnection {
         return stringResponse;
     }
 
+    //These are private connections to the node.js server
+    public String getBlockIDByPreferences(String username,String url) throws IOException, JSONException {
+        String res = "";
+        url = url + "getUserPreferences";
+        String jsonReq = "{\"userEmail\" : " + "\"" + username + "\"" + "}";
+        String response = doPostRequest(url,jsonReq);
+        JSONObject jsonResponse = new JSONObject(response);
+        res = jsonResponse.getString("blockID");
+        return res;
+    }
+
+    public void updateUserPreferences(String username, String blockID, String url) throws IOException {
+        String jsonReq = "{\"userEmail\" : " + "\"" + username + "\"" + ", \"blockID\" :" + "\"" + blockID + "\"" + "}";
+        url = url + "updateUserPreference";
+        doPostRequest(url,jsonReq);
+    }
+
+    public void addUserPreferences(String username, String blockID, String url) throws IOException {
+        url = url + "addUserPreference";
+        String jsonReq = "{ \"userEmail\" : " + "\"" + username + "\"" +" , \"visitedBlocks\" : [{ \"blockID\" : " + "\"" +  blockID + "\"" + ", \"timesVisited\" : \"1\"}]}";
+        doPostRequest(url,jsonReq);
+    }
+
+    public Boolean checkForUserPreferences(String username,String url) throws IOException, JSONException {
+        Boolean res = false;
+        String jsonReq = "{\"userEmail\" : " + "\"" + username + "\"" + "}";
+        url = url + "checkForUser";
+        String response = doPostRequest(url,jsonReq);
+        JSONObject jsonResponse = new JSONObject(response);
+        res = jsonResponse.getBoolean("value");
+        return res;
+    }
+
     public String getErrorMessage(int entityId){
         String response = "";
         response = "{\n" +

@@ -28,6 +28,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 
+import br.cin.ufpe.inesescin.smartparking.asyncTasks.CheckExistenceAndCreateOrUpdateAsync;
+import br.cin.ufpe.inesescin.smartparking.asyncTasks.LatLngByUserPreferencesAsync;
 import br.cin.ufpe.inesescin.smartparking.service.DirectionListener;
 import br.cin.ufpe.inesescin.smartparking.service.DirectionServiceImp;
 import br.cin.ufpe.inesescin.smartparking.service.IDirectionService;
@@ -35,6 +37,7 @@ import br.cin.ufpe.inesescin.smartparking.service.LocationListener;
 import br.cin.ufpe.inesescin.smartparking.service.LocationService;
 import br.cin.ufpe.inesescin.smartparking.asyncTasks.BlockLatLngByStoreNameAsync;
 import br.cin.ufpe.inesescin.smartparking.asyncTasks.OnBlockLatLngReceivedListener;
+import br.cin.ufpe.inesescin.smartparking.util.Constants;
 import br.cin.ufpe.inesescin.smartparking.util.PermissionRequest;
 
 
@@ -120,7 +123,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-
         return true;
     }
 
@@ -132,11 +134,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             String query = intent.getStringExtra(SearchManager.QUERY);
             BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(query, MapsActivity.this);
             asyncBlsn.execute();
+            CheckExistenceAndCreateOrUpdateAsync checkEcua = new CheckExistenceAndCreateOrUpdateAsync(Constants.USERNAME,query);
+            checkEcua.execute();
         } else if (Intent.ACTION_VIEW.equalsIgnoreCase(intent.getAction())) {
             // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
             String data = intent.getDataString();
-            BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(data, MapsActivity.this);
-            asyncBlsn.execute();
+            if(data.equals("O de sempre")){
+                LatLngByUserPreferencesAsync asyncBupa = new LatLngByUserPreferencesAsync(Constants.USERNAME,MapsActivity.this);
+                asyncBupa.execute();
+            }else{
+                BlockLatLngByStoreNameAsync asyncBlsn = new BlockLatLngByStoreNameAsync(data, MapsActivity.this);
+                asyncBlsn.execute();
+                CheckExistenceAndCreateOrUpdateAsync checkEcua = new CheckExistenceAndCreateOrUpdateAsync(Constants.USERNAME,data);
+                checkEcua.execute();
+            }
         }
 
     }
@@ -157,9 +168,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBlockLatLngReceived(LatLng latLng) {
+        LatLng problematicLatLng = new LatLng(0,0);
         if(latLng!=null){
-            this.destination = latLng;
-            callCurrentLocation();
+            if(latLng == problematicLatLng){
+                Toast.makeText(this, "Essa loja não está cadastrada em nosso sistema, tente novamente", Toast.LENGTH_SHORT).show();
+            }else{
+                this.destination = latLng;
+                callCurrentLocation();
+            }
         }else{
             Toast.makeText(this, "Erro ao se conectar com o servidor. Tente novamente mais tarde", Toast.LENGTH_SHORT).show();
         }
