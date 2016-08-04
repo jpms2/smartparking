@@ -105,8 +105,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.mMap.setBuildingsEnabled(true);
         this.mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        LatLng latLng = new LatLng(-8.085131, -34.894550);
-        this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f));
+        LatLng latLng = new LatLng(-8.084905, -34.894845);
+        this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18.2f));
 
 
     }
