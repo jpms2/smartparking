@@ -99,7 +99,7 @@ public class FiwareConnection {
     }
 
     public String getBlockIDByStore(String storeName) throws IOException, JSONException {
-        int objNum = countEntityByAttribute("130.206.119.206:1026","latLng");
+        int objNum = countEntityByAttribute(Constants.FIWARE_ADDRESS,"latLng");
         String answer = "";
         for(int i = 0; i < objNum;i++){
             String response = getEntityAttributeValue("lojas",Integer.toString(i), Constants.FIWARE_ADDRESS,"value");
@@ -115,13 +115,23 @@ public class FiwareConnection {
         return answer;
     }
 
-    public Double[] getLatLng(String entityID) throws IOException, JSONException {
-        Double[] answer = new Double[2];
-        String response = getEntityAttributeValue("latLng",entityID, Constants.FIWARE_ADDRESS,"value");
-        JSONArray jsonResponseArray = new JSONArray(response);
-        JSONObject jsonObj = jsonResponseArray.getJSONObject(0);
-        answer[0] = Double.parseDouble(jsonObj.getString("lat"));
-        answer[1] = Double.parseDouble(jsonObj.getString("lng"));
+    public String getBlockNameByID(String entityId) throws IOException, JSONException {
+        int objNum = countEntityByAttribute(Constants.FIWARE_ADDRESS,"latLng");
+        String answer = "";
+        answer = getEntityAttributeValue("nome",entityId, Constants.FIWARE_ADDRESS,"value");
+        return answer;
+    }
+
+    public String getBlockIDByName(String blockName) throws IOException, JSONException {
+        int objNum = countEntityByAttribute(Constants.FIWARE_ADDRESS,"latLng");
+        String answer = "";
+        String response = "";
+        for(int i = 0;i < objNum;i++){
+            response = getEntityAttributeValue("nome",""+i, Constants.FIWARE_ADDRESS,"value");
+            if(response.equalsIgnoreCase(blockName)){
+                answer = ""+i;
+            }
+        }
         return answer;
     }
 

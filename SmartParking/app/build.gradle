@@ -26,4 +26,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.android.support:design:23.3.0'
     compile 'com.squareup.okhttp3:okhttp:3.1.2'
+    compile files('libs/SAILS_SDK_V1.73_Published.jar')
 }

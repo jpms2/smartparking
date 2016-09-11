@@ -3,8 +3,6 @@ package br.cin.ufpe.inesescin.smartparking.service;
 import android.location.Location;
 import android.os.AsyncTask;
 
-import br.cin.ufpe.inesescin.smartparking.MapsActivity;
-
 /**
  * Created by jal3 on 01/07/2016.
  */

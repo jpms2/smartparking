@@ -27,4 +27,8 @@ public class PermissionRequest {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_LOCATION_REQUEST_PERMISSION);
     }
 
+    public static void requestWifiPermission(Activity activity){
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE}, ACCESS_LOCATION_REQUEST_PERMISSION);
+    }
+
 }
