@@ -116,19 +116,30 @@ public class FiwareConnection {
     }
 
     public String getBlockNameByID(String entityId) throws IOException, JSONException {
-        int objNum = countEntityByAttribute(Constants.FIWARE_ADDRESS,"latLng");
+        String response = "";
         String answer = "";
-        answer = getEntityAttributeValue("nome",entityId, Constants.FIWARE_ADDRESS,"value");
+        String request = "{\"entities\": [{\"type\":\"Block\",\"isPattern\": \"true\", \"id\":"+ entityId +"}]}";
+        response = doPostRequest(Constants.FIWARE_ADDRESS+"/v1/queryContext",request);
+        JSONObject jsonResponse = new JSONObject(response);
+        JSONArray contextArray = jsonResponse.getJSONArray("contextResponses");
+        JSONObject contextObject = contextArray.getJSONObject(0);
+        JSONObject contextElements = contextObject.getJSONObject("contextElement");
+        JSONArray attributesArray = contextElements.getJSONArray("attributes");
+        for(int i = 0;i < attributesArray.length();i++){
+            if(attributesArray.getJSONObject(i).getString("name").equalsIgnoreCase("nome")){
+                answer = attributesArray.getJSONObject(i).getString("value");
+            }
+        }
         return answer;
     }
 
     public String getBlockIDByName(String blockName) throws IOException, JSONException {
-        int objNum = countEntityByAttribute(Constants.FIWARE_ADDRESS,"latLng");
+        //int objNum = countEntityByAttribute(Constants.FIWARE_ADDRESS,"latLng");
+        int objNum = 2;
         String answer = "";
-        String response = "";
         for(int i = 0;i < objNum;i++){
-            response = getEntityAttributeValue("nome",""+i, Constants.FIWARE_ADDRESS,"value");
-            if(response.equalsIgnoreCase(blockName)){
+            String possibleName = getBlockNameByID(i+"");
+            if(possibleName.equalsIgnoreCase(blockName)){
                 answer = ""+i;
             }
         }
@@ -154,7 +165,7 @@ public class FiwareConnection {
     private synchronized String doPostRequest(String url, String json) throws IOException {
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
-                .url(url)
+                .url("http://"+url)
                 .addHeader("Accept", "application/json")
                 .addHeader("Connection", "close")
                 .post(body)

@@ -18,15 +18,6 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/SAILSMap" />
-    <Spinner
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinner"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp" />
 
     <ImageView
         android:layout_width="57dp"
@@ -50,27 +41,18 @@
         android:layout_height="60dp"
         android:id="@+id/lockcenter"
         android:src="@drawable/center1"
-        android:layout_above="@+id/imageView"
-        android:layout_alignParentLeft="true" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:src="@drawable/maplogo"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:visibility="visible" />
+        android:layout_marginBottom="0dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"/>
 
     <Button
         android:id="@+id/stopRoute"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Stop Route"
+        android:text="@string/stopRoute"
         android:textStyle="bold"
-        android:layout_below="@+id/spinner"
-        android:layout_alignRight="@+id/zoomin"
-        android:layout_alignEnd="@+id/zoomin" />
+        android:layout_alignTop="@+id/zoomin"
+        android:layout_alignParentLeft="true"/>
 
 </RelativeLayout>
 

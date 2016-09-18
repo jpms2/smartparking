@@ -52,21 +52,22 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
     ImageView zoomout;
     ImageView lockcenter;
     Button endRouteButton;
-    TextView distanceView;
-    TextView msgView;
-    Vibrator mVibrator;
     Spinner floorList;
     ArrayAdapter<String> adapter;
     byte zoomSav = 0;
     private String searchString;
+    Boolean finished;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sails_map);
         setActivityEnvironment();
+        if(!PermissionRequest.checkLocationPermission(this)){
+            PermissionRequest.requestLocationPermission(this);
+        }
         getSearchQuery();
-        floorList = (Spinner) findViewById(R.id.spinner);
+        //floorList = (Spinner) findViewById(R.id.spinner);
         endRouteButton = (Button) findViewById(R.id.stopRoute);
         endRouteButton.setVisibility(View.INVISIBLE);
         lockcenter = (ImageView) findViewById(R.id.lockcenter);
@@ -75,7 +76,6 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
         zoomin.setOnClickListener(controlListener);
         zoomout.setOnClickListener(controlListener);
         lockcenter.setOnClickListener(controlListener);
-        //PermissionRequest.requestLocationPermission(this);
         //new a SAILS engine.
         mSails = new SAILS(this);
         //set location mode.
@@ -154,7 +154,8 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
             @Override
             public void run() {
                 //please change token and building id to your own building project in cloud.
-                mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "57c04ed108920f6b4b0002fa", new SAILS.OnFinishCallback() {
+                mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "57d8265a08920f6b4b0003fc", new SAILS.OnFinishCallback() {
+                //mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "57c04ed108920f6b4b0002fa", new SAILS.OnFinishCallback() {
                     @Override
                     public void onSuccess(String response) {
                         runOnUiThread(new Runnable() {
@@ -175,6 +176,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
                 });
             }
         });
+        finished = true;
     }
 
     public void setActivityEnvironment(){
@@ -192,15 +194,8 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.busca).getActionView();
         // Assumes current activity is the searchable activity
-        // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-        if (!mSails.isLocationEngineStarted()) {
-            mSails.startLocatingEngine();
-            mSailsMapView.setLocatorMarkerVisible(true);
-            mSailsMapView.setMode(SAILSMapView.LOCATION_CENTER_LOCK | SAILSMapView.FOLLOW_PHONE_HEADING);
-            lockcenter.setVisibility(View.VISIBLE);
-        }
         return true;
     }
 
@@ -254,6 +249,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
             public void onClick(List<LocationRegion> locationRegions) {
                 LocationRegion lr = locationRegions.get(0);
                 //begin to routing
+
                 if (mSails.isLocationEngineStarted()) {
                     //set routing start point to current user location.
                     mSailsMapView.getRoutingManager().setStartRegion(PathRoutingManager.MY_LOCATION);
@@ -263,9 +259,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
 
                     //set routing path's color.
                     mSailsMapView.getRoutingManager().getPathPaint().setColor(0xFF35b3e5);
-
                     endRouteButton.setVisibility(View.VISIBLE);
-                    msgView.setVisibility(View.VISIBLE);
 
                 } else {
                     mSailsMapView.getRoutingManager().setTargetMakerDrawable(Marker.boundCenterBottom(getResources().getDrawable(R.drawable.map_destination)));
@@ -278,30 +272,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
                 mSailsMapView.getRoutingManager().setTargetRegion(lr);
 
                 //begin to route.
-                if (mSailsMapView.getRoutingManager().enableHandler())
-                    distanceView.setVisibility(View.VISIBLE);
-            }
-        });
-
-        mSailsMapView.getPinMarkerManager().setOnPinMarkerClickCallback(new PinMarkerManager.OnPinMarkerClickCallback() {
-            @Override
-            public void OnClick(MarkerManager.LocationRegionMarker locationRegionMarker) {
-                Toast.makeText(getApplication(), "(" + Double.toString(locationRegionMarker.locationRegion.getCenterLatitude()) + "," +
-                        Double.toString(locationRegionMarker.locationRegion.getCenterLongitude()) + ")", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        //set location region long click call back.
-        mSailsMapView.setOnRegionLongClickListener(new SAILSMapView.OnRegionLongClickListener() {
-            @Override
-            public void onLongClick(List<LocationRegion> locationRegions) {
-                if (mSails.isLocationEngineStarted())
-                    return;
-
-                mVibrator.vibrate(70);
-                mSailsMapView.getMarkerManager().clear();
-                mSailsMapView.getRoutingManager().setStartRegion(locationRegions.get(0));
-                mSailsMapView.getMarkerManager().setLocationRegionMarker(locationRegions.get(0), Marker.boundCenter(getResources().getDrawable(R.drawable.start_point)));
+                mSailsMapView.getRoutingManager().enableHandler();
             }
         });
 
@@ -353,7 +324,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
 
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mSails.getFloorDescList());
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        floorList.setAdapter(adapter);
+/*        floorList.setAdapter(adapter); //TODO Code to handle floor changing
         floorList.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -365,7 +336,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
-        });
+        });*/
     }
 
     void routingInitial() {
@@ -375,6 +346,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
             @Override
             public void onArrived(LocationRegion targetRegion) {
                 Toast.makeText(getApplication(), "Chegou ao destino", Toast.LENGTH_SHORT).show();
+                endRouteButton.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -395,7 +367,6 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
 
             @Override
             public void onTotalDistanceRefresh(int distance) {
-                distanceView.setText("Total Routing Distance: " + Integer.toString(distance) + " (m)");
             }
 
             @Override
@@ -418,47 +389,8 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
 
             @Override
             public void onSwitchFloorInfoRefresh(List<PathRoutingManager.SwitchFloorInfo> infoList, int nearestIndex) {
-
-                //set markers for every transfer location
-                for (PathRoutingManager.SwitchFloorInfo mS : infoList) {
-                    if (mS.direction != PathRoutingManager.SwitchFloorInfo.GO_TARGET)
-                        mSailsMapView.getMarkerManager().setLocationRegionMarker(mS.fromBelongsRegion, Marker.boundCenter(getResources().getDrawable(R.drawable.transfer_point)));
                 }
-
-                //when location engine not turn,there is no current switch floor info.
-                if (nearestIndex == -1)
-                    return;
-
-                PathRoutingManager.SwitchFloorInfo sf = infoList.get(nearestIndex);
-
-                switch (sf.nodeType) {
-                    case PathRoutingManager.SwitchFloorInfo.ELEVATOR:
-                        if (sf.direction == PathRoutingManager.SwitchFloorInfo.UP)
-                            msgView.setText("Dica de navegaçao: \n" + "Pegue o elevador e suba até " + mSails.getFloorDescription(sf.toFloorname));
-                        else if (sf.direction == PathRoutingManager.SwitchFloorInfo.DOWN)
-                            msgView.setText("Dica de navegaçao: \n" + "\" + \"Pegue o elevador e desça até" + mSails.getFloorDescription(sf.toFloorname));
-                        break;
-
-                    case PathRoutingManager.SwitchFloorInfo.ESCALATOR:
-                        if (sf.direction == PathRoutingManager.SwitchFloorInfo.UP)
-                            msgView.setText("Dica de navegaçao: \nPegue a escada rolante subindo para " + mSails.getFloorDescription(sf.toFloorname));
-                        else if (sf.direction == PathRoutingManager.SwitchFloorInfo.DOWN)
-                            msgView.setText("Dica de navegaçao: \nPegue a escada rolante descendo para " + mSails.getFloorDescription(sf.toFloorname));
-                        break;
-
-                    case PathRoutingManager.SwitchFloorInfo.STAIR:
-                        if (sf.direction == PathRoutingManager.SwitchFloorInfo.UP)
-                            msgView.setText("Dica de navegaçao: \nPor favor, suba as escadas até" + mSails.getFloorDescription(sf.toFloorname));
-                        else if (sf.direction == PathRoutingManager.SwitchFloorInfo.DOWN)
-                            msgView.setText("Dicas de navegação: \nPor favor, desça as escadas até " + mSails.getFloorDescription(sf.toFloorname));
-                        break;
-
-                    case PathRoutingManager.SwitchFloorInfo.DESTINATION:
-                        msgView.setText("Dicas de navegação: vá ate " + sf.fromBelongsRegion.getName());
-                        break;
-                }
-            }
-        });
+            });
     }
 
     View.OnClickListener controlListener = new View.OnClickListener() {
@@ -506,13 +438,11 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
 
     @Override
     public void onBlockNameReceivedListener(String result) {
-        PermissionRequest.requestWifiPermission(this);
         if (mSails.isLocationEngineStarted()) {
             if(result.equalsIgnoreCase("nulo")){
                 Toast.makeText(SailsMapActivity.this,"Essa loja nao existe!",Toast.LENGTH_LONG).show();
             }else{
-                LocationRegion target = new LocationRegion();
-                target.label = "Cinove";
+                LocationRegion target = mSails.findRegionByLabel(result).get(0);
                 //set routing start point to current user location.
                 mSailsMapView.getRoutingManager().setStartRegion(PathRoutingManager.MY_LOCATION);
                 mSailsMapView.getRoutingManager().setTargetRegion(target);
@@ -537,5 +467,25 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
             }
         }
     }
-}
 
+    @Override
+    public void onResume() {
+        super.onResume();
+            if (!mSails.isLocationEngineStarted() && finished) {
+                mSails.startLocatingEngine();
+                Double x = mSails.getLatitude();
+                Double y = mSails.getLongitude();
+                String j = mSails.getBuildingName();
+                String k = mSails.getFloor();
+                endRouteButton.setVisibility(View.INVISIBLE);
+                endRouteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        endRouteButton.setVisibility(View.INVISIBLE);
+                        //end route.
+                        mSailsMapView.getRoutingManager().disableHandler();
+                    }
+                });
+            }
+        }
+    }
