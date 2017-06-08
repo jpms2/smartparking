@@ -29,7 +29,7 @@ public class CheckExistenceAndCreateOrUpdateAsync extends AsyncTask<String, Void
     protected Void doInBackground(String... params) {
         boolean check;
         try {
-            String blockID = fiwareConnection.getBlockIDByName(storeName);
+            String blockID = fiwareConnection.getBlockIDByStore(storeName);
             if(!blockID.equals("")){
                 check = fiwareConnection.checkForUserPreferences(username, Constants.LOCALHOST_ADDRESS);
                 if(check){

@@ -97,7 +97,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
             }
         });
 
-        mSails.setOnBLEPositionInitialzeCallback(10000,new SAILS.OnBLEPositionInitializeCallback() {
+        mSails.setOnBLEPositionInitialzeCallback(5000,new SAILS.OnBLEPositionInitializeCallback() {
             @Override
             public void onStart() {
 
@@ -154,8 +154,8 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
             @Override
             public void run() {
                 //please change token and building id to your own building project in cloud.
-                mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "57d8265a08920f6b4b0003fc", new SAILS.OnFinishCallback() {
-                //mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "57c04ed108920f6b4b0002fa", new SAILS.OnFinishCallback() {
+                   // mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "57d8265a08920f6b4b0003fc", new SAILS.OnFinishCallback() {
+                mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "5873e7edcc8415f521000137", new SAILS.OnFinishCallback() {
                     @Override
                     public void onSuccess(String response) {
                         runOnUiThread(new Runnable() {
@@ -165,7 +165,6 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
                                 routingInitial();
                             }
                         });
-
                     }
 
                     @Override
@@ -202,11 +201,12 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
     public void getSearchQuery(){
         // Get the intent, verify the action and get the query
         Intent intent = getIntent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         if (Intent.ACTION_SEARCH.equalsIgnoreCase(intent.getAction())) {
             // Handle the normal search query case
             String query = intent.getStringExtra(SearchManager.QUERY);
             this.searchString = query;
-            BlockNameByStoreNameAsync asyncBlsn = new BlockNameByStoreNameAsync(query, SailsMapActivity.this);
+            BlockNameByStoreNameAsync asyncBlsn = new BlockNameByStoreNameAsync(query, this);
             asyncBlsn.execute();
             CheckExistenceAndCreateOrUpdateAsync checkEcua = new CheckExistenceAndCreateOrUpdateAsync(Constants.USERNAME,query);
             checkEcua.execute();
@@ -214,17 +214,16 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
             // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
             String data = intent.getDataString();
             if(data.equals("O de sempre")){
-                BlockNameByUserPreferencesAsync asyncBupa = new BlockNameByUserPreferencesAsync(Constants.USERNAME,SailsMapActivity.this);
+                BlockNameByUserPreferencesAsync asyncBupa = new BlockNameByUserPreferencesAsync(Constants.USERNAME, this);
                 asyncBupa.execute();
             }else{
                 this.searchString = data;
                 CheckExistenceAndCreateOrUpdateAsync checkEcua = new CheckExistenceAndCreateOrUpdateAsync(Constants.USERNAME,data);
                 checkEcua.execute();
-                BlockNameByStoreNameAsync asyncBlsn = new BlockNameByStoreNameAsync(data, SailsMapActivity.this);
+                BlockNameByStoreNameAsync asyncBlsn = new BlockNameByStoreNameAsync(data, this);
                 asyncBlsn.execute();
             }
         }
-
     }
 
     void mapViewInitial() {
@@ -347,6 +346,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
             public void onArrived(LocationRegion targetRegion) {
                 Toast.makeText(getApplication(), "Chegou ao destino", Toast.LENGTH_SHORT).show();
                 endRouteButton.setVisibility(View.INVISIBLE);
+                finish();
             }
 
             @Override
@@ -438,32 +438,56 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
 
     @Override
     public void onBlockNameReceivedListener(String result) {
+        LocationRegion target = new LocationRegion();
+        mSails.startLocatingEngine();
+        Boolean foundRoute = false;
         if (mSails.isLocationEngineStarted()) {
             if(result.equalsIgnoreCase("nulo")){
                 Toast.makeText(SailsMapActivity.this,"Essa loja nao existe!",Toast.LENGTH_LONG).show();
             }else{
-                LocationRegion target = mSails.findRegionByLabel(result).get(0);
-                //set routing start point to current user location.
-                mSailsMapView.getRoutingManager().setStartRegion(PathRoutingManager.MY_LOCATION);
-                mSailsMapView.getRoutingManager().setTargetRegion(target);
-                //set routing end point marker icon.
-                mSailsMapView.getRoutingManager().setTargetMakerDrawable(Marker.boundCenterBottom(getResources().getDrawable(R.drawable.destination)));
-
-                //set routing path's color.
-                mSailsMapView.getRoutingManager().getPathPaint().setColor(0xFF35b3e5);
-                endRouteButton.setVisibility(View.VISIBLE);
-                mSailsMapView.getRoutingManager().enableHandler();
-                endRouteButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        endRouteButton.setVisibility(View.INVISIBLE);
-                        //distanceView.setVisibility(View.INVISIBLE);
-                        //currentFloorDistanceView.setVisibility(View.INVISIBLE);
-                        //msgView.setVisibility(View.INVISIBLE);
-                        //end route.
-                        mSailsMapView.getRoutingManager().disableHandler();
+                String floor = mSails.getFloor();
+                if("".equals(floor)){
+                    floor = "1";
+                }
+                List<LocationRegion> all_lr = mSails.getLocationRegionList(floor);
+                if(all_lr != null && all_lr.size() > 0){
+                    for(LocationRegion lr : all_lr){
+                        if (lr.label.equalsIgnoreCase(result)){
+                            target = lr;
+                            foundRoute = true;
+                        }
                     }
-                });
+                }else{
+                    Toast t = Toast.makeText(getBaseContext(), "Falha ao carregar caminho, por favor tente novamente", Toast.LENGTH_LONG);
+                    t.show();
+                }
+                if (foundRoute){
+                    //set routing start point to current user location.
+                    mSailsMapView.getRoutingManager().setStartRegion(PathRoutingManager.MY_LOCATION);
+                    mSailsMapView.getRoutingManager().setTargetRegion(target);
+                    //set routing end point marker icon.
+                    mSailsMapView.getRoutingManager().setTargetMakerDrawable(Marker.boundCenterBottom(getResources().getDrawable(R.drawable.destination)));
+
+                    //set routing path's color.
+                    mSailsMapView.getRoutingManager().getPathPaint().setColor(0xFF35b3e5);
+                    endRouteButton.setVisibility(View.VISIBLE);
+                    mSailsMapView.getRoutingManager().enableHandler();
+                    endRouteButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            endRouteButton.setVisibility(View.INVISIBLE);
+                            //distanceView.setVisibility(View.INVISIBLE);
+                            //currentFloorDistanceView.setVisibility(View.INVISIBLE);
+                            //msgView.setVisibility(View.INVISIBLE);
+                            //end route.
+                            mSailsMapView.getRoutingManager().disableHandler();
+                            finish();
+                        }
+                    });
+                }else{
+                    Toast t = Toast.makeText(getBaseContext(), "Falha ao carregar caminho, por favor tente novamente", Toast.LENGTH_LONG);
+                    t.show();
+                }
             }
         }
     }
@@ -478,14 +502,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
                 String j = mSails.getBuildingName();
                 String k = mSails.getFloor();
                 endRouteButton.setVisibility(View.INVISIBLE);
-                endRouteButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        endRouteButton.setVisibility(View.INVISIBLE);
-                        //end route.
-                        mSailsMapView.getRoutingManager().disableHandler();
-                    }
-                });
             }
+        finished = false;
         }
     }

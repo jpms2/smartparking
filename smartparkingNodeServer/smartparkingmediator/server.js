@@ -70,9 +70,9 @@ router.post('/checkForUser', function(req, res) {
         var userPreferenceCollection = docs;
         var userEmail = req.body.userEmail;
         for(var i = 0; i < userPreferenceCollection.length;i++){
-            if(userPreferenceCollection[i].userEmail.toUpperCase() === userEmail.toUpperCase()){
-                response = {value: true};
-            }
+                if(userPreferenceCollection[i].userEmail.toUpperCase() === userEmail.toUpperCase()){
+                    response = {value: true};
+                }
         }
         res.json(response);
     });
