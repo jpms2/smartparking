@@ -11,4 +11,17 @@
     <string name="stopRoute">cancelar rota</string>
 
     <string name="hint_search">search</string>
+    <string name="title_activity_list_parking_spots">ListParkingSpotsActivity</string>
+    <string name="title_activity_list_spots">Listagem de vagas livres</string>
+    <string name="edit_message">Enter a message</string>
+    <string name="button_send">buscar vagas</string>
+    <string name="ground">Térreo:</string>
+    <string name="firstFloor">Primeiro andar:</string>
+    <string name="secondFloor">Segundo andar:</string>
+    <string name="thirdFloor">Terceiro andar:</string>
+    <string name="fourthFloor">Quarto andar:</string>
+    <string name="fifthFloor">Quinto andar:</string>
+    <string name="sixthFloor">Sexto andar:</string>
+    <string name="generateRoute">Gerar rotas</string>
+    <string name="listTitle">Número de vagas livres por andar</string>
 </resources>

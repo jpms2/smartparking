@@ -41,7 +41,7 @@ public class SuggestionsProvider extends SearchRecentSuggestionsProvider {
 
     public MatrixCursor deliverCursor(MatrixCursor mc, String search){
 
-         String[] lojas = {"O de sempre", "Perini","Seaway","Tok & Stock", "Swarovski"};
+         String[] lojas = {"Tok Stok", "Perini","Mc Donalds", "Game station"};
         MatrixCursor matrixCursor = mc;
         matrixCursor.addRow(new String[] {"" + 0, lojas[0],lojas[0]});
         for(int i = 1;i < lojas.length;i++){

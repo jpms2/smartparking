@@ -63,9 +63,6 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sails_map);
         setActivityEnvironment();
-        if(!PermissionRequest.checkLocationPermission(this)){
-            PermissionRequest.requestLocationPermission(this);
-        }
         getSearchQuery();
         //floorList = (Spinner) findViewById(R.id.spinner);
         endRouteButton = (Button) findViewById(R.id.stopRoute);
@@ -153,11 +150,12 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
         mSailsMapView.post(new Runnable() {
             @Override
             public void run() {
-                //please change token and building id to your own building project in cloud.
-                   // mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "57d8265a08920f6b4b0003fc", new SAILS.OnFinishCallback() {
-                mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "5873e7edcc8415f521000137", new SAILS.OnFinishCallback() {
+                // Em ordem : Casa, Riomar, CIn
+                    mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "57d8265a08920f6b4b0003fc", new SAILS.OnFinishCallback() {
+                //mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "5873e7edcc8415f521000137", new SAILS.OnFinishCallback() {
+                //mSails.loadCloudBuilding("f920fef19da544d493c7ee2b02202c02", "57c04ed108920f6b4b0002fa", new SAILS.OnFinishCallback() {
                     @Override
-                    public void onSuccess(String response) {
+                        public void onSuccess(String response) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -169,8 +167,8 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
 
                     @Override
                     public void onFailed(String response) {
-                        Toast t = Toast.makeText(getBaseContext(), "Load cloud project fail, please check network connection.", Toast.LENGTH_SHORT);
-                        t.show();
+                        String log = response;
+                        log.toString();
                     }
                 });
             }
@@ -237,8 +235,8 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
         mSailsMapView.setLocatorMarkerVisible(true);
 
         //load first floor map in package.
+        //mSailsMapView.loadFloorMap(mSails.getFloorNameList().get(4));
         mSailsMapView.loadFloorMap(mSails.getFloorNameList().get(0));
-
         //Auto Adjust suitable map zoom level and position to best view position.
         mSailsMapView.autoSetMapZoomAndView();
 
@@ -404,6 +402,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
                 mSailsMapView.zoomOut();
             } else if (v == lockcenter) {
                 Boolean x = mSails.isInThisBuilding();
+                String y = mSails.getFloor();
                 if (!mSails.isLocationFix() || !mSails.isLocationEngineStarted()) {
                     Toast t = Toast.makeText(getBaseContext(), "Localização nao encontrada!.", Toast.LENGTH_SHORT);
                     t.show();
@@ -461,7 +460,7 @@ public class SailsMapActivity extends AppCompatActivity implements OnBlockNameRe
                     Toast t = Toast.makeText(getBaseContext(), "Falha ao carregar caminho, por favor tente novamente", Toast.LENGTH_LONG);
                     t.show();
                 }
-                if (foundRoute){
+                if  (foundRoute){
                     //set routing start point to current user location.
                     mSailsMapView.getRoutingManager().setStartRegion(PathRoutingManager.MY_LOCATION);
                     mSailsMapView.getRoutingManager().setTargetRegion(target);

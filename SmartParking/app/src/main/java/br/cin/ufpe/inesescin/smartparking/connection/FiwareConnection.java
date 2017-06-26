@@ -46,6 +46,31 @@ public class FiwareConnection {
         return answer;
     }
 
+    public String[] getEntitiesByType(String siteAddress, String type) throws IOException, JSONException {
+        String[] response = new String[7];
+        String url = siteAddress + "/v1/queryContext/";
+        String json = "{" + "\"entities\": [" + "{" + "\"type\": \"" + type + "\"," + "\"isPattern\": \"true\"," + "\"id\": \".*\"" + "}]}";
+        JSONObject jObj = new JSONObject(doPostRequest(url, json));
+        JSONArray jarr = jObj.getJSONArray("contextResponses");
+        for(int i = 0; i < jarr.length();i++){
+            JSONObject jObj2 = (jarr.getJSONObject(i)).getJSONObject("contextElement");
+            JSONArray jArr2 = jObj2.getJSONArray("attributes");
+            if(jArr2.length() >= 6){
+                JSONObject jObj3 = jArr2.getJSONObject(5);
+                String emptySpaces = jObj3.getString("value");
+                response[i] = emptySpaces;
+            }else{
+                JSONObject jObj3 = jArr2.getJSONObject(0);
+                String emptySpaces = jObj3.getString("value");
+                response[i] = emptySpaces;
+            }
+            if(i == 6){
+                i = jarr.length();
+            }
+        }
+        return response;
+    }
+
     public String getEntityByType(String siteAddress, String type) throws IOException {
         String url = "http://" + siteAddress + "/v1/queryContext/";
         String json = "{" + "\"entities\": [" + "{" + "\"type\": \"" + type + "\"," + "\"isPattern\": \"true\"," + "\"id\": \".*\"" + "}]}";

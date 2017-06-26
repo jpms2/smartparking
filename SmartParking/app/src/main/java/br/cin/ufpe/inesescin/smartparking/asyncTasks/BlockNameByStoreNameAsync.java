@@ -34,7 +34,11 @@ public class BlockNameByStoreNameAsync extends AsyncTask<String, Void, String> {
         {
             entityId = fiwareConnection.getBlockIDByStore(storeName);
             if(!entityId.equals("")){
-                Boolean hasEmptyParkingSpot = fiwareConnection.lookForEmptyParkingSpace(entityId);
+                //Boolean hasEmptyParkingSpot = fiwareConnection.lookForEmptyParkingSpace(entityId);
+                Boolean hasEmptyParkingSpot = false;
+                if((Integer.parseInt(fiwareConnection.getEntityAttributeValue("vagasVazias",entityId,Constants.FIWARE_ADDRESS,"value")) > 0)){
+                    hasEmptyParkingSpot = true;
+                }
                 if(!hasEmptyParkingSpot){
                     entityId = fiwareConnection.searchAdjacentBlockID(entityId,maybeNextAdj);
                     blockName = fiwareConnection.getBlockNameByID(entityId);
@@ -51,7 +55,8 @@ public class BlockNameByStoreNameAsync extends AsyncTask<String, Void, String> {
         }catch (JSONException j){
             j.printStackTrace();
         }
-        return storeName;
+        //return storeName;
+        return blockName;
     }
 
     @Override
